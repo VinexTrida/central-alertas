@@ -10,7 +10,6 @@
     try { const tema = localStorage.getItem('central-alertas-tema'); if (['light', 'dark'].includes(tema)) document.documentElement.dataset.theme = tema; } catch (_) { /* O tema funciona mesmo com armazenamento bloqueado. */ }
   </script>
   <link rel="stylesheet" href="style.css">
-  <script src="noticias.js" defer></script>
   <script type="module" src="script.js" defer></script>
   <script type="module" src="correcoes.js" defer></script>
   <script type="module" src="reacoes.js" defer></script>
