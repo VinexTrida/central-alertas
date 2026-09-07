@@ -9,22 +9,7 @@ import {
 } from "./firebase.js";
 
 import { obterUsuarioAtual } from "./auth.js";
-
-
-// ======================================================
-// CONFIGURAÇÃO
-// ======================================================
-
 const PAGINA_ID = "central-de-alertas";
-
-
-// ======================================================
-// LOCALIZA OS ELEMENTOS DA INTERFACE
-// ======================================================
-//
-// Foram colocadas várias alternativas de seletores para facilitar
-// a compatibilidade com o HTML que já foi criado pelo Codex.
-//
 
 function encontrarElemento(seletores) {
     for (const seletor of seletores) {
@@ -38,25 +23,17 @@ function encontrarElemento(seletores) {
     return null;
 }
 
-
 const botaoLike = encontrarElemento([
   "#like"
 ]);
-
 
 const botaoDislike = encontrarElemento([
   "#dislike",
 ]);
 
-
 const contadorLikes = encontrarElemento([
   "#like-count"
 ]);
-
-
-// ======================================================
-// REPOSITÓRIO FIREBASE
-// ======================================================
 
 const repositorioReacoes = {
 
@@ -80,7 +57,6 @@ const repositorioReacoes = {
             usuario.uid
         );
 
-
         const [
             paginaSnapshot,
             reacaoSnapshot
@@ -89,16 +65,13 @@ const repositorioReacoes = {
             getDoc(reacaoRef)
         ]);
 
-
         const dadosPagina = paginaSnapshot.exists()
             ? paginaSnapshot.data()
             : {};
 
-
         const minhaReacao = reacaoSnapshot.exists()
             ? reacaoSnapshot.data().tipo
             : null;
-
 
         return {
             likes: Number(dadosPagina.likes ?? 0),
@@ -106,7 +79,6 @@ const repositorioReacoes = {
             minhaReacao
         };
     },
-
 
     async salvar(minhaReacao) {
 
@@ -118,16 +90,13 @@ const repositorioReacoes = {
             throw new Error("Reação inválida.");
         }
 
-
         const usuario = await obterUsuarioAtual();
-
 
         const paginaRef = doc(
             db,
             "paginas",
             PAGINA_ID
         );
-
 
         const reacaoRef = doc(
             db,
@@ -137,13 +106,9 @@ const repositorioReacoes = {
             usuario.uid
         );
 
-
         const estadoAtualizado = await runTransaction(
             db,
             async (transaction) => {
-
-                // IMPORTANTE:
-                // todas as leituras são feitas antes das gravações.
 
                 const paginaSnapshot =
                     await transaction.get(paginaRef);
@@ -151,12 +116,10 @@ const repositorioReacoes = {
                 const reacaoSnapshot =
                     await transaction.get(reacaoRef);
 
-
                 const dadosPagina =
                     paginaSnapshot.exists()
                         ? paginaSnapshot.data()
                         : {};
-
 
                 let likes =
                     Number(dadosPagina.likes ?? 0);
@@ -170,11 +133,6 @@ const repositorioReacoes = {
                         ? reacaoSnapshot.data().tipo
                         : null;
 
-
-                // --------------------------------------------------
-                // REMOVE A REAÇÃO ANTERIOR DOS TOTAIS
-                // --------------------------------------------------
-
                 if (reacaoAnterior === "like") {
                     likes -= 1;
                 }
@@ -182,11 +140,6 @@ const repositorioReacoes = {
                 if (reacaoAnterior === "dislike") {
                     dislikes -= 1;
                 }
-
-
-                // --------------------------------------------------
-                // ADICIONA A NOVA REAÇÃO
-                // --------------------------------------------------
 
                 if (minhaReacao === "like") {
                     likes += 1;
@@ -196,15 +149,8 @@ const repositorioReacoes = {
                     dislikes += 1;
                 }
 
-
-                // Segurança adicional
                 likes = Math.max(0, likes);
                 dislikes = Math.max(0, dislikes);
-
-
-                // --------------------------------------------------
-                // ATUALIZA OS TOTAIS DA PÁGINA
-                // --------------------------------------------------
 
                 transaction.set(
                     paginaRef,
@@ -216,11 +162,6 @@ const repositorioReacoes = {
                         merge: true
                     }
                 );
-
-
-                // --------------------------------------------------
-                // SALVA OU REMOVE O VOTO DO USUÁRIO
-                // --------------------------------------------------
 
                 if (minhaReacao === null) {
 
@@ -239,7 +180,6 @@ const repositorioReacoes = {
                     );
                 }
 
-
                 return {
                     likes,
                     dislikes,
@@ -253,11 +193,6 @@ const repositorioReacoes = {
     }
 };
 
-
-// ======================================================
-// ESTADO LOCAL DA INTERFACE
-// ======================================================
-
 let estadoReacoes = {
     likes: 0,
     dislikes: 0,
@@ -266,11 +201,6 @@ let estadoReacoes = {
 
 
 let salvandoReacao = false;
-
-
-// ======================================================
-// ATUALIZA A INTERFACE
-// ======================================================
 
 function atualizarInterface() {
 
@@ -285,24 +215,20 @@ function atualizarInterface() {
         const selecionado =
             estadoReacoes.minhaReacao === "like";
 
-
         botaoLike.classList.toggle(
             "ativo",
             selecionado
         );
-
 
         botaoLike.classList.toggle(
             "selecionado",
             selecionado
         );
 
-
         botaoLike.classList.toggle(
             "is-active",
             selecionado
         );
-
 
         botaoLike.setAttribute(
             "aria-pressed",
@@ -310,30 +236,25 @@ function atualizarInterface() {
         );
     }
 
-
     if (botaoDislike) {
 
         const selecionado =
             estadoReacoes.minhaReacao === "dislike";
-
 
         botaoDislike.classList.toggle(
             "ativo",
             selecionado
         );
 
-
         botaoDislike.classList.toggle(
             "selecionado",
             selecionado
         );
 
-
         botaoDislike.classList.toggle(
             "is-active",
             selecionado
         );
-
 
         botaoDislike.setAttribute(
             "aria-pressed",
@@ -341,11 +262,6 @@ function atualizarInterface() {
         );
     }
 }
-
-
-// ======================================================
-// BLOQUEIA OS BOTÕES DURANTE A GRAVAÇÃO
-// ======================================================
 
 function definirEstadoCarregando(carregando) {
 
@@ -362,20 +278,11 @@ function definirEstadoCarregando(carregando) {
     }
 }
 
-
-// ======================================================
-// PROCESSA CLIQUE EM UMA REAÇÃO
-// ======================================================
-
 async function processarReacao(tipo) {
 
     if (salvandoReacao) {
         return;
     }
-
-
-    // Se clicar novamente na reação atual,
-    // ela é removida.
 
     const novaReacao =
         estadoReacoes.minhaReacao === tipo
@@ -387,9 +294,7 @@ async function processarReacao(tipo) {
         ...estadoReacoes
     };
 
-
     definirEstadoCarregando(true);
-
 
     try {
 
@@ -397,7 +302,6 @@ async function processarReacao(tipo) {
             await repositorioReacoes.salvar(
                 novaReacao
             );
-
 
         estadoReacoes = novoEstado;
 
@@ -410,10 +314,6 @@ async function processarReacao(tipo) {
             erro
         );
 
-
-        // Volta para o estado anterior caso
-        // a gravação falhe.
-
         estadoReacoes = estadoAnterior;
 
         atualizarInterface();
@@ -423,11 +323,6 @@ async function processarReacao(tipo) {
         definirEstadoCarregando(false);
     }
 }
-
-
-// ======================================================
-// EVENTOS
-// ======================================================
 
 if (botaoLike) {
 
@@ -439,7 +334,6 @@ if (botaoLike) {
     );
 }
 
-
 if (botaoDislike) {
 
     botaoDislike.addEventListener(
@@ -450,21 +344,14 @@ if (botaoDislike) {
     );
 }
 
-
-// ======================================================
-// CARREGA AS REAÇÕES AO ABRIR A PÁGINA
-// ======================================================
-
 async function inicializarReacoes() {
 
     try {
 
         definirEstadoCarregando(true);
 
-
         estadoReacoes =
             await repositorioReacoes.carregar();
-
 
         atualizarInterface();
 
@@ -481,17 +368,7 @@ async function inicializarReacoes() {
     }
 }
 
-
 inicializarReacoes();
-
-
-// ======================================================
-// EXPORTAÇÃO
-// ======================================================
-//
-// Mantemos o repositório exportado caso futuramente
-// outras partes do site precisem utilizá-lo.
-//
 
 export {
     repositorioReacoes
