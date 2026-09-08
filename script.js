@@ -1,9 +1,9 @@
 'use strict';
 
 import { db, collection, getDocs } from "./firebase.js";
-import { obterUsuarioAtual } from "./auth.js";
 import { abrirCorrecaoNoticia } from "./correcoes.js";
 
+// Camada de dados: este é o único ponto a substituir pela futura API.
 async function obterNoticias() {
     const snapshot = await getDocs(collection(db, "noticias"));
 
@@ -43,6 +43,7 @@ function formatarData(valor) {
 function formatarMoeda(valor) {
   return temValor(valor) && Number.isFinite(Number(valor)) ? formatadorMoeda.format(Number(valor)) : '';
 }
+// Também impede URLs javascript:, data: e outros protocolos executáveis.
 function urlSegura(valor) {
   try { const url = new URL(valor); return ['https:', 'http:'].includes(url.protocol) ? url : null; } catch (_) { return null; }
 }
@@ -56,11 +57,13 @@ function criarPreviewMateria(materia) {
     preview.rel = 'noopener noreferrer';
     preview.setAttribute('aria-label', `${materia.titulo || materia.fonte || 'Matéria original'} (abre em nova aba)`);
   }
+  // Ícone genérico local: não exige serviços de preview nem imagens externas.
   const icon = elemento('span', 'source-icon', '▤');
   icon.setAttribute('aria-hidden', 'true');
   const copy = elemento('div', 'source-copy');
   if (temValor(materia.fonte)) copy.append(elemento('span', 'source-name', materia.fonte));
   if (temValor(materia.titulo)) copy.append(elemento('span', 'source-title', materia.titulo));
+  // O domínio é derivado da URL real para evitar previews enganosos.
   if (url) copy.append(elemento('span', 'source-domain', url.hostname));
   preview.append(icon, copy);
   if (url) { const arrow = elemento('span', 'external-icon', '↗'); arrow.setAttribute('aria-hidden', 'true'); preview.append(arrow); }
