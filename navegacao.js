@@ -4,6 +4,42 @@ const abasPagina = Array.from(document.querySelectorAll('[role="tab"]'));
 const paineisPagina = Array.from(document.querySelectorAll('[role="tabpanel"]'));
 const seletorPagina = document.querySelector('.view-tabs');
 const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
+const abaSobre = document.getElementById('tab-sobre');
+const chaveSobreVisto = 'central-alertas-sobre-visto';
+let temporizadorSobre = null;
+
+function sobreJaFoiVisto() {
+  try {
+    return localStorage.getItem(chaveSobreVisto) === 'true';
+  } catch (_) {
+    return false;
+  }
+}
+
+function marcarSobreComoVisto() {
+  if (temporizadorSobre !== null) {
+    clearTimeout(temporizadorSobre);
+    temporizadorSobre = null;
+  }
+  abaSobre.classList.remove('has-notification', 'attention-shake');
+  try {
+    localStorage.setItem(chaveSobreVisto, 'true');
+  } catch (_) {
+    /* A notificação ainda funciona durante a sessão. */
+  }
+}
+
+function prepararNotificacaoSobre() {
+  if (sobreJaFoiVisto()) return;
+  temporizadorSobre = setTimeout(() => {
+    temporizadorSobre = null;
+    if (abaSobre.getAttribute('aria-selected') === 'true') return;
+    abaSobre.classList.add('has-notification');
+    if (!reduzirMovimento.matches) {
+      abaSobre.classList.add('attention-shake');
+    }
+  }, 2000);
+}
 
 function selecionarAba(aba, moverFoco = false) {
   const indiceAnterior = abasPagina.findIndex(item => item.getAttribute('aria-selected') === 'true');
@@ -20,6 +56,7 @@ function selecionarAba(aba, moverFoco = false) {
     painel.hidden = painel.id !== aba.getAttribute('aria-controls');
   });
   seletorPagina.classList.toggle('is-about', indiceDestino === 1);
+  if (indiceDestino === 1) marcarSobreComoVisto();
 
   const painelAtivo = paineisPagina.find(painel => !painel.hidden);
   if (mudouDeAba && painelAtivo && !reduzirMovimento.matches && typeof painelAtivo.animate === 'function') {
@@ -48,3 +85,9 @@ abasPagina.forEach((aba, indice) => {
     selecionarAba(abasPagina[destino], true);
   });
 });
+
+abaSobre.addEventListener('animationend', () => {
+  abaSobre.classList.remove('attention-shake');
+});
+
+prepararNotificacaoSobre();

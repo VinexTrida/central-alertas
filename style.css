@@ -267,6 +267,30 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible {
   background:transparent;
 }
 
+#tab-sobre.has-notification::after {
+  content:"";
+  display:inline-block;
+  width:8px;
+  height:8px;
+  margin-left:8px;
+  border-radius:50%;
+  background:#f2c94c;
+  box-shadow:0 0 0 3px rgb(242 201 76 / .18);
+  vertical-align:middle;
+}
+
+.view-tab.attention-shake {
+  animation:sobre-attention .46s ease-in-out;
+}
+
+@keyframes sobre-attention {
+  0%,100% { transform:translateX(0); }
+  20% { transform:translateX(-3px) rotate(-1deg); }
+  40% { transform:translateX(3px) rotate(1deg); }
+  60% { transform:translateX(-2px) rotate(-.6deg); }
+  80% { transform:translateX(2px) rotate(.6deg); }
+}
+
 /* Avaliação da página: alinhada à direita, antes da lista de notícias. */
 .reactions {
   display:flex;
