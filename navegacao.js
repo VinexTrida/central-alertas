@@ -38,7 +38,7 @@ function prepararNotificacaoSobre() {
     if (!reduzirMovimento.matches) {
       abaSobre.classList.add('attention-shake');
     }
-  }, 2000);
+  }, 5000);
 }
 
 function selecionarAba(aba, moverFoco = false) {
