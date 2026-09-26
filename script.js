@@ -4,6 +4,8 @@ import {
   db,
   collection,
   getDocs,
+  query,
+  orderBy,
   doc,
   runTransaction
 } from "./firebase.js";
@@ -63,7 +65,12 @@ function registrarAcessoSite() {
 
 // Camada de dados: este é o único ponto a substituir pela futura API.
 async function obterNoticias() {
-    const snapshot = await getDocs(collection(db, "noticias"));
+    const consulta = query(
+        collection(db, "noticias"),
+        orderBy("criadoEm", "desc")
+    );
+
+    const snapshot = await getDocs(consulta);
 
     const noticias = snapshot.docs.map((documento) => {
         return {
