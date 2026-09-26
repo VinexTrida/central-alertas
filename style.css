@@ -108,9 +108,9 @@ body:has(.like-dialog[open]) {
   --text-primary:#20252c;
   --text-secondary:#58616c;
   --border:#dde2e7;
-  --accent:#2e57d1;
+  --accent:#1a2d99;
   --accent-soft:#edf2ff;
-  --focus:#2e57d1;
+  --focus:#1a2d99;
   --radius:22px}
 
 [data-theme="dark"] {
@@ -285,6 +285,21 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible {
   line-height:1;
   box-shadow:0 0 0 3px rgb(242 201 76 / .18);
   transform:translateY(-50%);
+  animation:sobre-notification-in .1s ease-out both;
+}
+
+#tab-sobre.has-notification.notification-leaving::after {
+  animation:sobre-notification-out .1s ease-in both;
+}
+
+@keyframes sobre-notification-in {
+  from { opacity:0; transform:translateY(-50%) scale(0); }
+  to { opacity:1; transform:translateY(-50%) scale(1); }
+}
+
+@keyframes sobre-notification-out {
+  from { opacity:1; transform:translateY(-50%) scale(1); }
+  to { opacity:0; transform:translateY(-50%) scale(0); }
 }
 
 .view-tabs.attention-swing {

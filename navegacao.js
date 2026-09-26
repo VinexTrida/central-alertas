@@ -18,8 +18,16 @@ function sobreJaFoiVisto() {
 }
 
 function marcarSobreComoVisto() {
-  abaSobre.classList.remove('has-notification');
   seletorPagina.classList.remove('attention-swing');
+
+  if (abaSobre.classList.contains('has-notification')) {
+    if (reduzirMovimento.matches) {
+      abaSobre.classList.remove('has-notification', 'notification-leaving');
+    } else {
+      abaSobre.classList.add('notification-leaving');
+    }
+  }
+
   try {
     localStorage.setItem(chaveSobreVisto, 'true');
   } catch (_) {
@@ -86,6 +94,12 @@ abasPagina.forEach((aba, indice) => {
 seletorPagina.addEventListener('animationend', event => {
   if (event.animationName === 'sobre-attention') {
     seletorPagina.classList.remove('attention-swing');
+  }
+});
+
+abaSobre.addEventListener('animationend', event => {
+  if (event.animationName === 'sobre-notification-out') {
+    abaSobre.classList.remove('has-notification', 'notification-leaving');
   }
 });
 
