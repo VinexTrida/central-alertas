@@ -16,6 +16,7 @@ import { obterUsuarioAtual } from "./auth.js";
 // ======================================================
 
 const PAGINA_ID = "central-de-alertas";
+const EVENTO_REACOES_CARREGADAS = "central-alertas:reacoes-carregadas";
 
 
 // ======================================================
@@ -358,6 +359,23 @@ function atualizarInterface() {
 }
 
 
+function informarReacoesCarregadas() {
+
+    document.documentElement.dataset.reacoesCarregadas = "true";
+
+    document.dispatchEvent(
+        new CustomEvent(
+            EVENTO_REACOES_CARREGADAS,
+            {
+                detail: {
+                    likes: estadoReacoes.likes
+                }
+            }
+        )
+    );
+}
+
+
 // ======================================================
 // BLOQUEIA OS BOTÕES DURANTE A GRAVAÇÃO
 // ======================================================
@@ -518,6 +536,10 @@ async function inicializarReacoes() {
 
 
         atualizarInterface();
+
+        // A notificação de "Sobre nós" começa junto da exibição
+        // do total de likes carregado do Firebase.
+        informarReacoesCarregadas();
 
     } catch (erro) {
 

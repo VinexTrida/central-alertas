@@ -4,8 +4,18 @@ import {
   onAuthStateChanged
 } from "./firebase.js";
 
+let promessaUsuarioAtual = null;
+
 export function obterUsuarioAtual() {
-  return new Promise((resolve, reject) => {
+  if (auth.currentUser) {
+    return Promise.resolve(auth.currentUser);
+  }
+
+  if (promessaUsuarioAtual) {
+    return promessaUsuarioAtual;
+  }
+
+  promessaUsuarioAtual = new Promise((resolve, reject) => {
     const cancelarObservador = onAuthStateChanged(
       auth,
       async (usuario) => {
@@ -20,10 +30,16 @@ export function obterUsuarioAtual() {
           const credencial = await signInAnonymously(auth);
           resolve(credencial.user);
         } catch (erro) {
+          promessaUsuarioAtual = null;
           reject(erro);
         }
       },
-      reject
+      erro => {
+        promessaUsuarioAtual = null;
+        reject(erro);
+      }
     );
   });
+
+  return promessaUsuarioAtual;
 }

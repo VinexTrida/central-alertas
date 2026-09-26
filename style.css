@@ -108,9 +108,9 @@ body:has(.like-dialog[open]) {
   --text-primary:#20252c;
   --text-secondary:#58616c;
   --border:#dde2e7;
-  --accent:#256951;
-  --accent-soft:#eef7f2;
-  --focus:#197953;
+  --accent:#2e57d1;
+  --accent-soft:#edf2ff;
+  --focus:#2e57d1;
   --radius:22px}
 
 [data-theme="dark"] {
@@ -122,9 +122,9 @@ body:has(.like-dialog[open]) {
   --text-primary:#f0f1f3;
   --text-secondary:#abb2bd;
   --border:#363b42;
-  --accent:#a1d5bc;
-  --accent-soft:#273830;
-  --focus:#b0e8cb}
+  --accent:#58c7f3;
+  --accent-soft:#193743;
+  --focus:#58c7f3}
 
 * {
   box-sizing:border-box}
@@ -268,27 +268,38 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible {
 }
 
 #tab-sobre.has-notification::after {
-  content:"";
-  display:inline-block;
-  width:8px;
-  height:8px;
-  margin-left:8px;
+  content:"1";
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:absolute;
+  top:50%;
+  right:7px;
+  width:18px;
+  height:18px;
   border-radius:50%;
   background:#f2c94c;
+  color:#111;
+  font-size:.65rem;
+  font-weight:750;
+  line-height:1;
   box-shadow:0 0 0 3px rgb(242 201 76 / .18);
-  vertical-align:middle;
+  transform:translateY(-50%);
 }
 
-.view-tab.attention-shake {
-  animation:sobre-attention .46s ease-in-out;
+.view-tabs.attention-swing {
+  transform-origin:50% 100%;
+  animation:sobre-attention .82s cubic-bezier(.36,.07,.19,.97);
 }
 
 @keyframes sobre-attention {
-  0%,100% { transform:translateX(0); }
-  20% { transform:translateX(-3px) rotate(-1deg); }
-  40% { transform:translateX(3px) rotate(1deg); }
-  60% { transform:translateX(-2px) rotate(-.6deg); }
-  80% { transform:translateX(2px) rotate(.6deg); }
+  0%,100% { transform:translateY(0) rotate(0); }
+  14% { transform:translateY(-2px) rotate(-6deg); }
+  28% { transform:translateY(-2px) rotate(6deg); }
+  42% { transform:translateY(-1px) rotate(-4.5deg); }
+  56% { transform:translateY(-1px) rotate(4.5deg); }
+  70% { transform:rotate(-2.5deg); }
+  84% { transform:rotate(2.5deg); }
 }
 
 /* Avaliação da página: alinhada à direita, antes da lista de notícias. */

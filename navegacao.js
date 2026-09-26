@@ -6,7 +6,8 @@ const seletorPagina = document.querySelector('.view-tabs');
 const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)');
 const abaSobre = document.getElementById('tab-sobre');
 const chaveSobreVisto = 'central-alertas-sobre-visto';
-let temporizadorSobre = null;
+const eventoReacoesCarregadas = 'central-alertas:reacoes-carregadas';
+let notificacaoSobreExibida = false;
 
 function sobreJaFoiVisto() {
   try {
@@ -17,11 +18,8 @@ function sobreJaFoiVisto() {
 }
 
 function marcarSobreComoVisto() {
-  if (temporizadorSobre !== null) {
-    clearTimeout(temporizadorSobre);
-    temporizadorSobre = null;
-  }
-  abaSobre.classList.remove('has-notification', 'attention-shake');
+  abaSobre.classList.remove('has-notification');
+  seletorPagina.classList.remove('attention-swing');
   try {
     localStorage.setItem(chaveSobreVisto, 'true');
   } catch (_) {
@@ -30,15 +28,14 @@ function marcarSobreComoVisto() {
 }
 
 function prepararNotificacaoSobre() {
-  if (sobreJaFoiVisto()) return;
-  temporizadorSobre = setTimeout(() => {
-    temporizadorSobre = null;
-    if (abaSobre.getAttribute('aria-selected') === 'true') return;
-    abaSobre.classList.add('has-notification');
-    if (!reduzirMovimento.matches) {
-      abaSobre.classList.add('attention-shake');
-    }
-  }, 5000);
+  if (notificacaoSobreExibida || sobreJaFoiVisto()) return;
+  if (abaSobre.getAttribute('aria-selected') === 'true') return;
+
+  notificacaoSobreExibida = true;
+  abaSobre.classList.add('has-notification');
+  if (!reduzirMovimento.matches) {
+    seletorPagina.classList.add('attention-swing');
+  }
 }
 
 function selecionarAba(aba, moverFoco = false) {
@@ -86,8 +83,15 @@ abasPagina.forEach((aba, indice) => {
   });
 });
 
-abaSobre.addEventListener('animationend', () => {
-  abaSobre.classList.remove('attention-shake');
+seletorPagina.addEventListener('animationend', event => {
+  if (event.animationName === 'sobre-attention') {
+    seletorPagina.classList.remove('attention-swing');
+  }
 });
 
-prepararNotificacaoSobre();
+document.addEventListener(eventoReacoesCarregadas, prepararNotificacaoSobre, { once: true });
+
+// Garante o funcionamento mesmo se o Firebase responder antes deste módulo iniciar.
+if (document.documentElement.dataset.reacoesCarregadas === 'true') {
+  prepararNotificacaoSobre();
+}
