@@ -1,7 +1,65 @@
 'use strict';
 
-import { db, collection, getDocs } from "./firebase.js";
+import {
+  db,
+  collection,
+  getDocs,
+  doc,
+  runTransaction
+} from "./firebase.js";
+import { obterUsuarioAtual } from "./auth.js";
 import { abrirCorrecaoNoticia } from "./correcoes.js";
+
+let promessaRegistroAcesso = null;
+
+function normalizarContador(valor) {
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero >= 0 ? numero : 0;
+}
+
+function registrarAcessoSite() {
+  // O mesmo carregamento sempre reutiliza esta promessa, mesmo que a função
+  // seja chamada novamente por engano por outro trecho do frontend.
+  if (promessaRegistroAcesso) return promessaRegistroAcesso;
+
+  promessaRegistroAcesso = (async () => {
+    try {
+      const usuario = await obterUsuarioAtual();
+      const estatisticasRef = doc(db, 'estatisticas', 'geral');
+      const visitanteRef = doc(db, 'visitantes', usuario.uid);
+
+      await runTransaction(db, async transaction => {
+        // Todas as leituras acontecem antes de qualquer gravação.
+        const [estatisticasSnapshot, visitanteSnapshot] = await Promise.all([
+          transaction.get(estatisticasRef),
+          transaction.get(visitanteRef)
+        ]);
+
+        const estatisticas = estatisticasSnapshot.exists()
+          ? estatisticasSnapshot.data()
+          : {};
+        const visitanteNovo = !visitanteSnapshot.exists();
+        const acessosTotais = normalizarContador(estatisticas.acessosTotais) + 1;
+        const visitantesUnicos = normalizarContador(estatisticas.visitantesUnicos)
+          + (visitanteNovo ? 1 : 0);
+
+        transaction.set(
+          estatisticasRef,
+          { acessosTotais, visitantesUnicos },
+          { merge: true }
+        );
+
+        if (visitanteNovo) {
+          transaction.set(visitanteRef, { contado: true });
+        }
+      });
+    } catch (erro) {
+      console.error('Erro ao registrar acesso do site:', erro);
+    }
+  })();
+
+  return promessaRegistroAcesso;
+}
 
 // Camada de dados: este é o único ponto a substituir pela futura API.
 async function obterNoticias() {
@@ -197,3 +255,4 @@ function iniciarTema() {
 }
 iniciarTema();
 carregarNoticias();
+registrarAcessoSite();
